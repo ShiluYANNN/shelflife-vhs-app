@@ -36,6 +36,26 @@
     :root {
       --H: min(65vw, 43svh);
     }
+
+    /* Mobile performance: drop GPU-heavy backdrop-filter (a known iOS Safari
+       flicker source) and the full-screen 34px blur, and stop forcing
+       permanent compositor layers. Visual style is preserved via more opaque
+       solid backgrounds on the key surfaces. */
+    * {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      will-change: auto !important;
+    }
+    .arch-shadow-svg {
+      filter: none;
+      opacity: .5;
+    }
+    .tonal-btn { background: rgba(250, 248, 244, .8); }
+    .tonal-btn.primary { background: rgba(20, 19, 18, .8); }
+    .tabs-nav { background: rgba(246, 243, 236, .88); }
+    .tab-indicator { background: rgba(20, 19, 18, .72); }
+    .detail { background: rgba(238, 234, 226, .97); }
+    .detail-top { background: rgba(238, 234, 226, .97); }
   }
 
   * {
@@ -1460,6 +1480,7 @@
       <button type="button" class="tonal-btn" id="btn-batch-import-originals" title="选择你上传的原图或去字书皮，自动识别并替换为5款内置原图封面">载入原图书皮</button>
       <button type="button" class="tonal-btn" id="btn-open-cat-settings">默认有效期</button>
       <button type="button" class="tonal-btn" id="btn-open-shortcuts">iPhone 日历联动</button>
+      <button type="button" class="tonal-btn" id="btn-open-accounts">👤 <span id="account-name-chip">我的</span></button>
       <button type="button" class="tonal-btn primary" id="btn-open-add">+ 记录新开封</button>
     </div>
     <div class="poster-year-stack" id="poster-year-stack">
@@ -1880,71 +1901,84 @@
     </div>
 
     <div class="drawer-body" style="line-height:1.6;font-size:13.5px">
-      <!-- 方案 1：一键安装 iCloud 快捷指令链接 -->
-      <div style="padding:15px;background:rgba(30,64,128,0.08);border:1.5px solid rgba(30,64,128,0.26);border-radius:3px;display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
-          <div style="font-weight:700;font-size:14.5px;color:var(--cobalt)">📲 第一步：手机一键安装「添加物品到期」iOS 快捷指令</div>
-          <span id="icloud-link-badge" style="font-size:11px;padding:2px 8px;background:rgba(30,64,128,0.14);color:var(--cobalt);border-radius:2px;font-weight:600">支持 iCloud 链接直跳安装</span>
+      <!-- 步骤 1：安装快捷指令 -->
+      <div style="padding:14px 15px;background:#F7F4EE;border:1px solid var(--glass-border);border-radius:3px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-weight:700;font-size:12px;color:var(--cobalt);background:rgba(30,64,128,0.10);padding:2px 9px;border-radius:2px">第 1 步</span>
+          <span style="font-weight:700;font-size:14px">安装快捷指令</span>
+          <span id="icloud-link-badge" style="margin-left:auto;font-size:11px;padding:2px 8px;background:rgba(30,64,128,0.14);color:var(--cobalt);border-radius:2px;font-weight:600">待绑定 iCloud 分享链接</span>
         </div>
-
-        <p style="font-size:12.5px;color:var(--ink)">
-          手机点下方按钮 → 自动跳到「快捷指令」App → 点一下<strong>「添加快捷指令」</strong>即安装完成（内部已自动配好：读取物品 JSON → 提取名称/分类/渠道/到期日 → 自动写入 iPhone 提醒事项 &amp; 系统日历，无需手动逐项拼装动作）：
-        </p>
-
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <a href="#install-shortcut" class="tonal-btn primary" id="a-install-icloud-shortcut" style="height:38px;padding:0 16px;background:var(--cobalt);border-color:var(--cobalt);color:#fff;text-decoration:none;font-size:13px">
-            📲 点击安装 iOS 快捷指令（添加物品到期）
-          </a>
-          <button type="button" class="tonal-btn" id="btn-download-shortcut-file" style="height:38px;padding:0 13px;font-weight:600">
-            📦 下载已做好动作的「添加物品到期.shortcut」源文件
-          </button>
+          <a href="#install-shortcut" class="tonal-btn primary" id="a-install-icloud-shortcut" style="height:38px;padding:0 16px;background:var(--cobalt);border-color:var(--cobalt);color:#fff;text-decoration:none;font-size:13px">📲 一键安装快捷指令</a>
+          <button type="button" class="tonal-btn" id="btn-download-shortcut-file" style="height:38px;padding:0 13px;font-weight:600">📦 下载源文件</button>
         </div>
-
-        <div class="form-row" style="margin-top:4px;padding-top:10px;border-top:1px dashed rgba(30,64,128,0.22)">
-          <label class="field-label" for="icloud-shortcut-url-input" style="font-size:12px">
-            <span>绑定「添加物品到期」iCloud 快捷指令分享链接（永久保存在网页中）</span>
-          </label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input type="url" class="field-input" id="icloud-shortcut-url-input" placeholder="粘贴 https://www.icloud.com/shortcuts/xxxxx 链接..." style="height:34px;flex:1;min-width:210px;font-size:12.5px" />
-            <button type="button" class="tonal-btn primary" id="btn-save-icloud-url" style="height:34px">保存 iCloud 链接</button>
-          </div>
-          <p style="font-size:11.5px;color:var(--muted);line-height:1.45">
-            💡 <strong>为什么需要填一次 iCloud 链接？</strong>苹果规定 <code>https://www.icloud.com/shortcuts/xxxxx</code> 必须由登录了 Apple ID 的「快捷指令」App 点击「共享 → 拷贝 iCloud 链接」生成。<br/>
-            我已经为你做好了完整的<strong>「添加物品到期.shortcut」</strong>源文件（点击上方「📦 下载源文件」或在电脑双击 <code>一键生成iPhone快捷指令.command</code> 即可直接导入快捷指令 App），你在快捷指令里长按它 → <strong>共享 → 拷贝 iCloud 链接</strong> → 粘贴到上方输入框点保存（或者发给我帮你写死进代码），以后任何手机点「📲 点击安装 iOS 快捷指令」都会直接跳进快捷指令 App 一键装好！
-          </p>
-        </div>
+        <details style="font-size:12.5px;color:var(--muted)">
+          <summary style="cursor:pointer;font-weight:600;color:var(--ink)">这是做什么的？</summary>
+          <p style="margin:8px 0 0">安装后，记录物品到期时可直接唤起 iOS「快捷指令」，自动写入系统提醒事项和日历。首次使用需在下方「高级设置」里绑定一次 iCloud 分享链接。</p>
+        </details>
       </div>
 
-      <!-- 方案 2：运行已安装的快捷指令 -->
-      <div style="padding:14px;background:#FAF8F4;border:1px solid var(--glass-border);border-radius:2px;display:flex;flex-direction:column;gap:9px">
-        <div style="font-weight:600;font-size:14px">⚡ 第二步：装好后，点击即可自动传参写入提醒 &amp; 日历</div>
-        <div class="form-row">
-          <label class="field-label" for="shortcut-name-input">要唤起的快捷指令名称（默认：添加物品到期）</label>
-          <div style="display:flex;gap:8px">
-            <input type="text" class="field-input" id="shortcut-name-input" value="添加物品到期" style="height:34px" />
-            <button type="button" class="tonal-btn primary" id="btn-save-shortcut-name" style="height:34px">保存名称</button>
-            <button type="button" class="tonal-btn" id="btn-test-shortcut" style="height:34px">⚡ 立即测试唤起</button>
-          </div>
+      <!-- 步骤 2：免装直接写日历 -->
+      <div style="padding:14px 15px;background:#EAE5DC;border-radius:3px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-weight:700;font-size:12px;color:var(--amber);background:rgba(168,80,26,0.10);padding:2px 9px;border-radius:2px">第 2 步 · 可选</span>
+          <span style="font-weight:700;font-size:14px">免装直接写入日历</span>
         </div>
-      </div>
-
-      <!-- 方案 3：免装快捷指令直呼 iPhone 原生日历 -->
-      <div style="padding:14px;background:#EAE5DC;border-radius:2px;display:flex;flex-direction:column;gap:8px">
-        <div style="font-weight:600;font-size:14px">📅 备选免装方案：直接唤起 iPhone 系统日历添加弹窗（0 配置）</div>
-        <p style="color:var(--muted);font-size:12.5px">
-          不装快捷指令也能直接用：点击「📅 添加到 iPhone 系统日历」或下方按钮，Safari 会直接弹出 iOS 原生日历事件添加卡（含到期前提醒 VALARM）。
-        </p>
+        <p style="font-size:12.5px;color:var(--muted);margin:0">不装快捷指令也能用：一键导出全部到期日程，Safari 会直接弹出 iOS 原生日历添加卡。</p>
         <div>
-          <button type="button" class="tonal-btn primary" id="btn-export-all-ics" style="height:34px">
-            导出全部物品到期日程到 iPhone 日历 (.ics)
-          </button>
+          <button type="button" class="tonal-btn primary" id="btn-export-all-ics" style="height:34px">📅 导出全部到期日程 (.ics)</button>
         </div>
       </div>
+
+      <!-- 高级设置 -->
+      <details style="padding:12px 15px;background:#F0ECE4;border:1px dashed var(--glass-border);border-radius:3px;font-size:12.5px">
+        <summary style="cursor:pointer;font-weight:700">⚙️ 高级设置</summary>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
+          <div>
+            <label class="field-label" for="icloud-shortcut-url-input" style="font-size:12px">绑定 iCloud 快捷指令分享链接（一次即可，之后手机点「一键安装」会直接跳转）</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <input type="url" class="field-input" id="icloud-shortcut-url-input" placeholder="https://www.icloud.com/shortcuts/xxxxx" style="height:34px;flex:1;min-width:210px;font-size:12.5px" />
+              <button type="button" class="tonal-btn primary" id="btn-save-icloud-url" style="height:34px">保存链接</button>
+            </div>
+            <p style="font-size:11.5px;color:var(--muted);line-height:1.45;margin:6px 0 0">怎么获取：在「快捷指令」App 里长按「添加物品到期」→ 共享 → 拷贝 iCloud 链接。</p>
+          </div>
+          <div>
+            <label class="field-label" for="shortcut-name-input" style="font-size:12px">要唤起的快捷指令名称</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" class="field-input" id="shortcut-name-input" value="添加物品到期" style="height:34px" />
+              <button type="button" class="tonal-btn primary" id="btn-save-shortcut-name" style="height:34px">保存名称</button>
+              <button type="button" class="tonal-btn" id="btn-test-shortcut" style="height:34px">⚡ 测试唤起</button>
+            </div>
+          </div>
+        </div>
+      </details>
     </div>
 
     <div class="drawer-foot">
       <span style="font-size:12px;color:var(--muted)">提示：在 Safari 点「分享 → 添加到主屏幕」即可像原生 App 一样全屏使用</span>
       <button type="button" class="tonal-btn primary" data-close-modal="shortcut-modal">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- 12. Accounts Modal -->
+<div class="drawer-backdrop" id="account-modal" role="dialog" aria-modal="true" aria-label="账户管理">
+  <div class="drawer-panel">
+    <div class="drawer-head">
+      <h2 class="drawer-title">账户管理</h2>
+      <button type="button" class="tonal-btn" data-close-modal="account-modal">关闭</button>
+    </div>
+    <div class="drawer-body" style="line-height:1.6;font-size:13.5px">
+      <p style="font-size:12.5px;color:var(--muted);margin:0">每个账户拥有独立的物品、分类和标签数据；数据保存在本机浏览器中，不联网、不上传。</p>
+      <div id="account-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px">
+        <input type="text" class="field-input" id="new-account-name" placeholder="新账户名称，如：家人 / 工作" style="height:36px;flex:1;min-width:180px" maxlength="20" />
+        <button type="button" class="tonal-btn primary" id="btn-create-account" style="height:36px">＋ 新建账户</button>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      <span style="font-size:12px;color:var(--muted)">切换 / 新建账户会自动刷新页面</span>
+      <button type="button" class="tonal-btn primary" data-close-modal="account-modal">完成</button>
     </div>
   </div>
 </div>
@@ -1969,6 +2003,34 @@
     SHORTCUT: 'sl_grundtvig_shortcut_v3',
     AUTO_CAL: 'sl_grundtvig_autocal_v3'
   };
+
+  /* ---- 本地账户系统（数据保存在本机浏览器，无需服务器） ---- */
+  const ACCOUNTS_KEY = 'sl_grundtvig_accounts_v3';
+  const ACTIVE_ACCOUNT_KEY = 'sl_grundtvig_active_account_v3';
+  const DEFAULT_ACCOUNT_ID = '__default__';
+
+  function rawGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function rawSet(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
+
+  function listAccounts() {
+    let arr = [];
+    try { arr = rawGet(ACCOUNTS_KEY) ? JSON.parse(rawGet(ACCOUNTS_KEY)) : []; } catch (e) { arr = []; }
+    if (!Array.isArray(arr) || arr.length === 0) {
+      arr = [{ id: DEFAULT_ACCOUNT_ID, name: '我的', createdAt: Date.now() }];
+      rawSet(ACCOUNTS_KEY, JSON.stringify(arr));
+    }
+    return arr;
+  }
+
+  const CURRENT_ACCOUNT_ID = (function () {
+    const saved = rawGet(ACTIVE_ACCOUNT_KEY);
+    const accs = listAccounts();
+    return (saved && accs.some(a => a.id === saved)) ? saved : DEFAULT_ACCOUNT_ID;
+  })();
+
+  function nsKey(key) {
+    return CURRENT_ACCOUNT_ID === DEFAULT_ACCOUNT_ID ? key : `${key}__acct_${CURRENT_ACCOUNT_ID}`;
+  }
 
   const DEFAULT_CATEGORIES = [
     { id: 'skincare', name: '护肤美妆', en: 'Skincare', defaultDays: 180 },
@@ -2105,6 +2167,7 @@
   }
 
   function loadJSON(key, fallback) {
+    key = nsKey(key);
     try {
       const raw = localStorage.getItem(key);
       if (!raw) return fallback;
@@ -2115,6 +2178,7 @@
   }
 
   function saveJSON(key, val) {
+    key = nsKey(key);
     try {
       localStorage.setItem(key, JSON.stringify(val));
     } catch (e) {}
@@ -2295,6 +2359,7 @@
   }
 
   (async () => {
+    if (CURRENT_ACCOUNT_ID !== DEFAULT_ACCOUNT_ID) return;
     const [idbCats, idbTags, idbItems, idbSkins, idbOrig] = await Promise.all([
       idbGet(STORAGE_KEYS.CATS),
       idbGet(STORAGE_KEYS.TAGS),
@@ -4379,6 +4444,73 @@
   window.addEventListener('resize', () => {
     measureGeometry();
   });
+
+  /* ---- 账户管理 UI ---- */
+  function renderAccountList() {
+    const listEl = document.getElementById('account-list');
+    if (!listEl) return;
+    const accs = listAccounts();
+    const active = CURRENT_ACCOUNT_ID;
+    listEl.innerHTML = '';
+    accs.forEach(a => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:#EAE5DC;border:1px solid var(--glass-border);border-radius:2px;';
+      const left = document.createElement('div');
+      left.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:14px;';
+      const avatar = document.createElement('span'); avatar.textContent = '👤'; left.appendChild(avatar);
+      const nameEl = document.createElement('strong'); nameEl.textContent = a.name; left.appendChild(nameEl);
+      if (a.id === active) {
+        const badge = document.createElement('span');
+        badge.textContent = '当前';
+        badge.style.cssText = 'font-size:11px;color:var(--cobalt);font-weight:600;background:rgba(30,64,128,0.12);padding:1px 7px;border-radius:2px;';
+        left.appendChild(badge);
+      }
+      const right = document.createElement('div');
+      right.style.cssText = 'display:flex;gap:6px;';
+      if (a.id !== active) {
+        const sw = document.createElement('button');
+        sw.className = 'tonal-btn primary'; sw.textContent = '切换'; sw.style.height = '30px';
+        sw.addEventListener('click', () => { rawSet(ACTIVE_ACCOUNT_KEY, a.id); location.reload(); });
+        right.appendChild(sw);
+      }
+      if (a.id !== DEFAULT_ACCOUNT_ID) {
+        const del = document.createElement('button');
+        del.className = 'tonal-btn danger'; del.textContent = '删除'; del.style.height = '30px';
+        del.addEventListener('click', () => {
+          if (!confirm(`确定删除账户「${a.name}」及其全部数据吗？此操作不可恢复。`)) return;
+          const rest = listAccounts().filter(x => x.id !== a.id);
+          rawSet(ACCOUNTS_KEY, JSON.stringify(rest));
+          if (a.id === active) rawSet(ACTIVE_ACCOUNT_KEY, DEFAULT_ACCOUNT_ID);
+          location.reload();
+        });
+        right.appendChild(del);
+      }
+      row.appendChild(left); row.appendChild(right);
+      listEl.appendChild(row);
+    });
+    const chip = document.getElementById('account-name-chip');
+    if (chip) {
+      const cur = accs.find(x => x.id === active);
+      if (cur) chip.textContent = cur.name;
+    }
+  }
+
+  document.getElementById('btn-open-accounts').addEventListener('click', () => {
+    renderAccountList();
+    document.getElementById('account-modal').classList.add('open');
+  });
+  document.getElementById('btn-create-account').addEventListener('click', () => {
+    const inp = document.getElementById('new-account-name');
+    const name = (inp.value || '').trim();
+    if (!name) { showToast('请输入账户名称'); return; }
+    const accs = listAccounts();
+    const id = 'acct_' + Date.now().toString(36);
+    accs.push({ id, name, createdAt: Date.now() });
+    rawSet(ACCOUNTS_KEY, JSON.stringify(accs));
+    rawSet(ACTIVE_ACCOUNT_KEY, id);
+    location.reload();
+  });
+  renderAccountList();
 
   measureGeometry();
   rebuildAppView();

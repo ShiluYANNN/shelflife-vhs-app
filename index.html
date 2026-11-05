@@ -2816,6 +2816,8 @@
   let pointerDownV = -1;
 
   let tapeRecords = [];
+  let activeCoverRect = null;
+  const isTouch = !window.matchMedia('(hover: hover)').matches;
 
   const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   let reducedMotion = reducedMotionQuery.matches;
@@ -2831,6 +2833,7 @@
     stageEl.style.setProperty('--ws', `${ws}px`);
     stageEl.style.setProperty('--d', `${d}px`);
     updateTabIndicator();
+    activeCoverRect = null;
   }
 
   function smoothstep(x) {
@@ -2919,9 +2922,11 @@
 
         tapeEl.addEventListener('pointerenter', () => {
           hoverV = v;
+          startLoop();
         });
         tapeEl.addEventListener('pointerleave', () => {
           if (hoverV === v) hoverV = -1;
+          startLoop();
         });
 
         stageEl.appendChild(tapeEl);
@@ -2932,6 +2937,8 @@
           spFace,
           cvFace,
           lift: 0,
+          lastSpShade: null,
+          lastCvShade: null,
           v
         });
       }
@@ -2943,6 +2950,8 @@
     T = s;
     setActiveCaption(activeIdx, 1, true);
     updateStatsSummary();
+    activeCoverRect = null;
+    startLoop();
   }
 
   function getRelativeIndex(v, scrollVal) {
@@ -3074,6 +3083,7 @@
   function jumpToCategoryFirstItem(catId) {
     if (catId === 'ALL') {
       T = Math.round(s) - mod(Math.round(s), N);
+      startLoop();
       return;
     }
     const targetIdx = visibleItems.findIndex(it => it.catId === catId);
@@ -3086,6 +3096,7 @@
     if (candidate - s > N / 2) candidate -= N;
     if (s - candidate > N / 2) candidate += N;
     T = candidate;
+    startLoop();
   }
 
   function updateStatsSummary() {
@@ -3108,6 +3119,14 @@
      7. MAIN rAF LOOP — Weighted Hardcover Physics & 3D Transform
      ========================================================================== */
   let lastTime = performance.now();
+  let loopActive = false;
+
+  function startLoop() {
+    if (loopActive) return;
+    loopActive = true;
+    lastTime = performance.now();
+    requestAnimationFrame(tick);
+  }
 
   function tick(now) {
     const dt = Math.min((now - lastTime) / 1000, 0.05);
@@ -3123,24 +3142,30 @@
       const dir = diff <= N / 2 ? 1 : -1;
       activeIdx = nearestIdx;
       setActiveCaption(activeIdx, dir, false);
+      activeCoverRect = getActiveVirtualCoverRect();
     }
 
-    const activeRect = getActiveVirtualCoverRect();
     const anyModalOpen = Boolean(document.querySelector('.drawer-backdrop.open'));
-    onCover = (
-      !isOpen &&
-      !anyModalOpen &&
-      mx >= activeRect.left &&
-      mx <= activeRect.right &&
-      my >= activeRect.top &&
-      my <= activeRect.bottom
-    );
+    if (isTouch) {
+      onCover = false;
+    } else {
+      if (!activeCoverRect) activeCoverRect = getActiveVirtualCoverRect();
+      const activeRect = activeCoverRect;
+      onCover = (
+        !isOpen &&
+        !anyModalOpen &&
+        mx >= activeRect.left &&
+        mx <= activeRect.right &&
+        my >= activeRect.top &&
+        my <= activeRect.bottom
+      );
 
-    const targetTiltY = onCover ? ((mx - (activeRect.left + activeRect.width / 2)) / (activeRect.width / 2)) * 5.2 : 0;
-    const targetTiltX = onCover ? -((my - (activeRect.top + activeRect.height / 2)) / (activeRect.height / 2)) * 3.8 : 0;
-    const tiltEase = 1 - Math.exp(-10 * dt);
-    tiltX += (targetTiltX - tiltX) * tiltEase;
-    tiltY += (targetTiltY - tiltY) * tiltEase;
+      const targetTiltY = onCover ? ((mx - (activeRect.left + activeRect.width / 2)) / (activeRect.width / 2)) * 5.2 : 0;
+      const targetTiltX = onCover ? -((my - (activeRect.top + activeRect.height / 2)) / (activeRect.height / 2)) * 3.8 : 0;
+      const tiltEase = 1 - Math.exp(-10 * dt);
+      tiltX += (targetTiltX - tiltX) * tiltEase;
+      tiltY += (targetTiltY - tiltY) * tiltEase;
+    }
 
     const liftEase = 1 - Math.exp(-12 * dt);
 
@@ -3170,18 +3195,47 @@
       rec.el.style.transform = `translate3d(${x.toFixed(2)}px, ${ty.toFixed(2)}px, ${tz.toFixed(2)}px) rotateZ(${rotZ.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg)`;
       rec.el.style.zIndex = String(Math.round(100 - absR * 4));
 
-      rec.spFace.style.setProperty('--shade', (o * 0.06).toFixed(3));
-      rec.cvFace.style.setProperty('--shade', ((1 - o) * 0.03).toFixed(3));
+      const spShade = (o * 0.06).toFixed(3);
+      if (rec.lastSpShade !== spShade) {
+        rec.spFace.style.setProperty('--shade', spShade);
+        rec.lastSpShade = spShade;
+      }
+      const cvShade = ((1 - o) * 0.03).toFixed(3);
+      if (rec.lastCvShade !== cvShade) {
+        rec.cvFace.style.setProperty('--shade', cvShade);
+        rec.lastCvShade = cvShade;
+      }
     }
 
-    const cursorEase = 1 - Math.exp(-18 * dt);
-    cx += (mx - cx) * cursorEase;
-    cy += (my - cy) * cursorEase;
-    const cursorWrap = document.getElementById('cursor-wrap');
-    cursorWrap.style.transform = `translate3d(${cx.toFixed(1)}px, ${cy.toFixed(1)}px, 0)`;
+    if (!isTouch) {
+      const cursorEase = 1 - Math.exp(-18 * dt);
+      cx += (mx - cx) * cursorEase;
+      cy += (my - cy) * cursorEase;
+      const cursorWrap = document.getElementById('cursor-wrap');
+      cursorWrap.style.transform = `translate3d(${cx.toFixed(1)}px, ${cy.toFixed(1)}px, 0)`;
 
-    cursorWrap.classList.toggle('open', onCover && !isOpen && !anyModalOpen);
-    cursorWrap.classList.toggle('spine', !onCover && hoverV !== -1 && !isOpen && !anyModalOpen);
+      cursorWrap.classList.toggle('open', onCover && !isOpen && !anyModalOpen);
+      cursorWrap.classList.toggle('spine', !onCover && hoverV !== -1 && !isOpen && !anyModalOpen);
+    }
+
+    let settled =
+      !isDragging &&
+      Math.abs(T - s) < 0.0004 &&
+      Math.abs(tiltX) < 0.01 &&
+      Math.abs(tiltY) < 0.01 &&
+      tapeRecords.every(r => r.lift < 0.001);
+
+    if (!isTouch) {
+      settled = settled &&
+        Math.abs(mx - cx) < 0.4 &&
+        Math.abs(my - cy) < 0.4;
+    }
+
+    if (settled) {
+      loopActive = false;
+      s = T;
+      return;
+    }
 
     requestAnimationFrame(tick);
   }
@@ -3194,9 +3248,11 @@
     if (isOpen || document.querySelector('.drawer-backdrop.open')) return;
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     T += (delta / (ws + gap)) * 0.5;
+    startLoop();
     clearTimeout(wheelSnapTimer);
     wheelSnapTimer = setTimeout(() => {
       T = Math.round(T);
+      startLoop();
     }, 160);
   }, { passive: true });
 
@@ -3209,11 +3265,13 @@
     dragStartT = T;
     const tapeEl = e.target.closest('.tape');
     pointerDownV = tapeEl ? Number(tapeEl.dataset.v) : -1;
+    startLoop();
   });
 
   window.addEventListener('pointermove', (e) => {
     mx = e.clientX;
     my = e.clientY;
+    if (!isTouch) startLoop();
     if (!isDragging) return;
     const dx = e.clientX - dragStartX;
     const dy = e.clientY - dragStartY;
@@ -3228,6 +3286,7 @@
   window.addEventListener('pointerup', (e) => {
     if (!isDragging) return;
     isDragging = false;
+    startLoop();
     if (dragMoved) {
       T = Math.round(T);
       setTimeout(() => { dragMoved = false; }, 50);
@@ -3269,12 +3328,15 @@
 
   document.getElementById('arrow-prev').addEventListener('click', () => {
     T = Math.round(T) - 1;
+    startLoop();
   });
   document.getElementById('arrow-next').addEventListener('click', () => {
     T = Math.round(T) + 1;
+    startLoop();
   });
 
   window.addEventListener('keydown', (e) => {
+    startLoop();
     const anyModal = document.querySelector('.drawer-backdrop.open');
     if (anyModal) {
       if (e.key === 'Escape') anyModal.classList.remove('open');
@@ -4515,7 +4577,7 @@
   measureGeometry();
   rebuildAppView();
   bakePhotorealisticOriginalCovers();
-  requestAnimationFrame(tick);
+  startLoop();
 })();
 </script>
 </body>

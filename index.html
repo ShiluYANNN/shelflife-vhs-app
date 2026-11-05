@@ -85,7 +85,6 @@
 
   /* ==========================================================================
      GRUNDTVIG'S CHURCH LIGHT FROSTED GLASS ARCHITECTURAL BACKGROUND
-     (Pre-baked static canvas + zero-cost gradients — 0% per-frame GPU blur)
      ========================================================================== */
   .frosted-architectural-bg {
     position: fixed;
@@ -93,36 +92,39 @@
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
-    background:
-      radial-gradient(ellipse 68% 54% at 50% 44%, rgba(255, 254, 250, 0.72) 0%, rgba(255, 252, 245, 0) 72%),
-      radial-gradient(ellipse 36% 78% at 68% 58%, rgba(110, 98, 82, 0.34) 0%, rgba(110, 98, 82, 0) 70%),
-      radial-gradient(ellipse 30% 68% at 46% 62%, rgba(88, 78, 66, 0.28) 0%, rgba(88, 78, 66, 0) 68%),
-      radial-gradient(ellipse 28% 52% at 26% 70%, rgba(145, 122, 102, 0.24) 0%, rgba(145, 122, 102, 0) 68%),
-      linear-gradient(165deg, #F6F4F0 0%, #EAE5DC 50%, #DCD4C6 100%);
+    contain: strict;
+    background: linear-gradient(165deg, #F5F3EF 0%, #EAE5DC 48%, #DDD6C9 100%);
     transform: translateZ(0);
   }
 
   .arch-shadow-svg {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.42;
+    inset: -8%;
+    width: 116%;
+    height: 116%;
+    filter: blur(34px);
+    -webkit-filter: blur(34px);
+    opacity: 0.90;
     pointer-events: none;
+    transform: translateZ(0);
   }
 
-  /* High-transparency frosted diffusion pane above the shelf (zero real-time backdrop-filter) */
+  /* High-transparency frosted diffusion pane behind the shelf */
   .frosted-diffusion-pane {
     position: fixed;
     inset: 0;
     z-index: 2;
     pointer-events: none;
+    contain: strict;
+    backdrop-filter: blur(16px) saturate(1.04);
+    -webkit-backdrop-filter: blur(16px) saturate(1.04);
     background: linear-gradient(
       180deg,
-      rgba(252, 250, 246, 0.14) 0%,
+      rgba(252, 250, 246, 0.10) 0%,
       rgba(236, 231, 222, 0.04) 58%,
-      rgba(198, 189, 175, 0.20) 100%
+      rgba(198, 189, 175, 0.22) 100%
     );
+    transform: translateZ(0);
   }
 
   .grain-layer {
@@ -164,13 +166,15 @@
     justify-content: center;
     height: 32px;
     padding: 0 13px;
-    background: rgba(252, 250, 246, 0.62);
+    background: rgba(252, 250, 246, 0.48);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     color: var(--ink);
     font-size: 12.5px;
     font-weight: 500;
     border-radius: 3px;
-    border: 1px solid rgba(20, 19, 18, 0.11);
-    box-shadow: 0 2px 8px rgba(20, 19, 18, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.60);
+    box-shadow: 0 2px 8px rgba(20, 19, 18, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.72);
     white-space: nowrap;
     transition: background-color .2s var(--ease), color .2s var(--ease), transform .15s var(--ease);
   }
@@ -265,26 +269,32 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* 2. Category Bar — Positioned high above the shelf with sheer frosted glass */
+  /* 2. Category Bar — Snug above the shelf with sheer frosted glass */
   .tabs-wrap {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    top: calc(50% - var(--H) / 2 - 106px);
+    top: max(80px, calc(50% - var(--H) / 2 - 86px));
     z-index: 30;
     display: flex;
     align-items: center;
     gap: 8px;
     max-width: 94vw;
+    transition: top .28s var(--ease);
+  }
+  body.grid-mode .tabs-wrap {
+    top: 84px;
   }
 
   .tabs-nav {
     position: relative;
     display: inline-flex;
     align-items: center;
-    background: rgba(252, 250, 246, 0.68);
-    border: 1px solid rgba(20, 19, 18, 0.10);
-    box-shadow: 0 4px 16px rgba(20, 19, 18, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    background: rgba(252, 250, 246, 0.52);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    box-shadow: 0 4px 16px rgba(20, 19, 18, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.78);
     padding: 3px;
     border-radius: 4px;
     overflow-x: auto;
@@ -651,13 +661,13 @@
   }
 
   /* ==========================================================================
-     4. Caption under shelf
+     4. Caption under shelf (Frosted Glass & Snug Below Shelf Ledge)
      ========================================================================== */
   .caption-stack {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
-    top: calc(50% + var(--H) / 2 + 26px);
+    top: calc(50% + var(--H) / 2 + 54px);
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
@@ -665,11 +675,13 @@
     cursor: pointer;
     z-index: 20;
     width: min(86vw, 620px);
-    padding: 12px 18px;
-    background: rgba(246, 243, 237, 0.86);
-    border: 1px solid rgba(255, 255, 255, 0.62);
+    padding: 11px 18px;
+    background: rgba(252, 250, 246, 0.56);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.68);
     box-shadow: 0 8px 24px rgba(20, 18, 15, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.85);
-    border-radius: 3px;
+    border-radius: 4px;
     transition: transform .2s var(--ease), background-color .2s var(--ease);
   }
   .caption-stack:active {
@@ -722,16 +734,18 @@
   /* 5. Left / Right Arrows */
   .nav-arrow {
     position: fixed;
-    top: calc(50% + var(--H) / 2 + 38px);
+    top: calc(50% + var(--H) / 2 + 64px);
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--ink);
-    background: rgba(252, 250, 246, 0.82);
-    border: 1px solid rgba(20, 19, 18, 0.12);
-    box-shadow: 0 4px 12px rgba(20, 18, 15, 0.06);
+    background: rgba(252, 250, 246, 0.58);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.68);
+    box-shadow: 0 4px 12px rgba(20, 18, 15, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.82);
     border-radius: 50%;
     z-index: 25;
     transition: background-color .2s var(--ease), color .2s var(--ease), transform .15s var(--ease);
@@ -1399,7 +1413,7 @@
     position: fixed;
     left: 50%;
     bottom: 68px;
-    transform: translate(-50%, 160%);
+    transform: translate3d(-50%, 28px, 0);
     z-index: 210;
     background: var(--ink);
     color: #F5F3EF;
@@ -1407,11 +1421,19 @@
     border-radius: 2px;
     font-size: 13px;
     font-weight: 500;
-    transition: transform .4s var(--ease);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform .36s var(--ease), opacity .26s var(--ease), visibility 0s linear .36s;
     pointer-events: none;
   }
+  .toast-bar:empty {
+    display: none !important;
+  }
   .toast-bar.show {
-    transform: translate(-50%, 0);
+    transform: translate3d(-50%, 0, 0);
+    opacity: 1;
+    visibility: visible;
+    transition: transform .36s var(--ease), opacity .26s var(--ease), visibility 0s linear 0s;
   }
 
   @media (max-width: 767px) {
@@ -1442,10 +1464,13 @@
       font-size: 11px;
     }
     .tabs-wrap {
-      top: calc(env(safe-area-inset-top, 0px) + 52px);
+      top: max(calc(env(safe-area-inset-top, 0px) + 56px), calc(50% - var(--H) / 2 - 92px));
       width: calc(100vw - 28px);
       justify-content: space-between;
       gap: 6px;
+    }
+    body.grid-mode .tabs-wrap {
+      top: calc(env(safe-area-inset-top, 0px) + 52px);
     }
     .tabs-nav {
       flex: 1;
@@ -1462,8 +1487,8 @@
       top: calc(50% + var(--H) / 2 - 5px);
     }
     .caption-stack {
-      top: auto;
-      bottom: calc(max(12px, env(safe-area-inset-bottom, 12px)) + 44px);
+      top: min(calc(100% - max(12px, env(safe-area-inset-bottom, 12px)) - 112px), calc(50% + var(--H) / 2 + 52px));
+      bottom: auto;
       width: calc(100vw - 108px);
       grid-template-columns: 1fr auto;
       gap: 8px;
@@ -1480,8 +1505,8 @@
       font-size: 15px;
     }
     .nav-arrow {
-      top: auto;
-      bottom: calc(max(12px, env(safe-area-inset-bottom, 12px)) + 48px);
+      top: min(calc(100% - max(12px, env(safe-area-inset-bottom, 12px)) - 105px), calc(50% + var(--H) / 2 + 59px));
+      bottom: auto;
       width: 38px;
       height: 38px;
     }
@@ -1569,6 +1594,12 @@
 <!-- GRUNDTVIG'S CHURCH LIGHT FROSTED GLASS ARCHITECTURAL BACKGROUND -->
 <div class="frosted-architectural-bg" aria-hidden="true">
   <svg class="arch-shadow-svg" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+    <defs>
+      <filter id="arch-frosted-blur" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="30" />
+      </filter>
+    </defs>
+    <g filter="url(#arch-frosted-blur)">
     <g fill="#6E6252">
       <path d="M 680,120 C 740,120 790,180 800,280 L 820,960 L 620,960 L 635,280 C 640,180 650,120 680,120 Z" opacity="0.72" />
       <path d="M 840,40 L 980,40 L 990,960 L 810,960 Z" opacity="0.64" />
@@ -1584,6 +1615,7 @@
     </g>
     <ellipse cx="300" cy="900" rx="110" ry="38" fill="#B58D76" opacity="0.42" />
     <ellipse cx="600" cy="905" rx="95" ry="35" fill="#B58D76" opacity="0.38" />
+    </g>
   </svg>
 </div>
 <div class="frosted-diffusion-pane" aria-hidden="true"></div>
@@ -1792,6 +1824,34 @@
             <div class="font-pill-group" id="detail-template-pills"></div>
           </div>
           <div class="styler-row">
+            <span class="styler-label">文字快捷位置：</span>
+            <div class="font-pill-group" id="detail-text-pos-presets">
+              <button type="button" class="font-pill" data-pos-preset="default">默认避窗</button>
+              <button type="button" class="font-pill" data-pos-preset="tl">左上</button>
+              <button type="button" class="font-pill" data-pos-preset="tr">右上</button>
+              <button type="button" class="font-pill" data-pos-preset="bl">左下</button>
+              <button type="button" class="font-pill" data-pos-preset="br">右下</button>
+              <button type="button" class="font-pill" id="btn-detail-text-color" title="切换深色/浅色封面文字">字色: 自动</button>
+            </div>
+          </div>
+          <div class="styler-row">
+            <span class="styler-label">文字左右 / 上下：</span>
+            <div style="display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap">
+              <span style="font-size:11px;color:var(--muted)">X</span>
+              <input type="range" id="detail-text-x" min="-180" max="200" step="2" value="0" style="flex:1;min-width:70px;height:4px;accent-color:var(--ink)" />
+              <span style="font-size:11px;color:var(--muted)">Y</span>
+              <input type="range" id="detail-text-y" min="-360" max="380" step="2" value="0" style="flex:1;min-width:70px;height:4px;accent-color:var(--ink)" />
+              <span id="detail-text-pos-val" style="font-size:11px;color:var(--ink);min-width:58px;text-align:right">0, 0</span>
+            </div>
+          </div>
+          <div class="styler-row">
+            <span class="styler-label">文字大小缩放：</span>
+            <div style="display:flex;align-items:center;gap:8px;flex:1">
+              <input type="range" id="detail-text-scale" min="0.72" max="1.32" step="0.02" value="1" style="flex:1;height:4px;accent-color:var(--ink)" />
+              <span id="detail-text-scale-val" style="font-size:11.5px;color:var(--ink);min-width:42px;text-align:right">100%</span>
+            </div>
+          </div>
+          <div class="styler-row">
             <span class="styler-label">书皮上下移动：</span>
             <div style="display:flex;align-items:center;gap:8px;flex:1">
               <input type="range" id="detail-cover-shift" min="-140" max="120" step="2" value="0" style="flex:1;height:4px;accent-color:var(--ink)" />
@@ -1858,9 +1918,14 @@
         </defs>
         <g clip-path="url(#poster-clip)" id="detail-book-svg-content"></g>
       </svg>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
-        <span style="font-size:11px;color:var(--muted)">💡 直接在上方书封上拖拽即可微调实拍图位置</span>
-        <button type="button" class="tonal-btn" id="btn-detail-adjust-crop">调整实拍图位置 / 书皮高低</button>
+      <div class="drag-mode-toggle" style="max-width:340px">
+        <button type="button" class="drag-mode-btn active" id="detail-mode-drag-text">✋ 拖拽文字位置</button>
+        <button type="button" class="drag-mode-btn" id="detail-mode-drag-photo">🖼️ 拖拽实拍图</button>
+        <button type="button" class="drag-mode-btn" id="detail-mode-drag-cover">↕️ 移书皮高低</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center">
+        <span style="font-size:11px;color:var(--muted)">💡 在书封上滑动即可自由移动文字或实拍图（自动防出界）</span>
+        <button type="button" class="tonal-btn" id="btn-detail-adjust-crop" style="height:26px;padding:0 10px;font-size:11px">调整实拍图位置 / 书皮高低</button>
       </div>
     </div>
   </div>
@@ -1883,7 +1948,8 @@
             <svg viewBox="0 0 400 560" id="studio-preview-svg"></svg>
           </div>
           <div class="drag-mode-toggle">
-            <button type="button" class="drag-mode-btn active" id="mode-drag-photo">拖拽实拍图</button>
+            <button type="button" class="drag-mode-btn active" id="mode-drag-text">拖拽文字</button>
+            <button type="button" class="drag-mode-btn" id="mode-drag-photo">拖拽实拍图</button>
             <button type="button" class="drag-mode-btn" id="mode-drag-cover">上下移书皮</button>
           </div>
         </div>
@@ -1911,6 +1977,13 @@
             <span style="min-width:72px">书皮上下移</span>
             <input type="range" id="f-cover-shift" min="-140" max="120" step="2" value="0" />
             <button type="button" class="tonal-btn" id="btn-reset-shift" style="height:24px;padding:0 8px;font-size:11px">居中</button>
+          </div>
+
+          <div class="slider-row">
+            <span style="min-width:72px">文字缩放/位置</span>
+            <input type="range" id="f-text-scale" min="0.72" max="1.32" step="0.02" value="1" />
+            <button type="button" class="tonal-btn" id="btn-studio-text-color" style="height:24px;padding:0 7px;font-size:11px">字色:自动</button>
+            <button type="button" class="tonal-btn" id="btn-reset-text-pos" style="height:24px;padding:0 8px;font-size:11px">复位文字</button>
           </div>
 
           <div class="form-row" style="margin-top:2px">
@@ -2810,30 +2883,189 @@
     return '#76ACD4';
   }
 
-  function renderGrundtvigTypographySVG(item, textColor, subColor, xLeft, yTop, fontFamily, showYearStack = true, numColor = null) {
+  function measureVisualUnits(str) {
+    let u = 0;
+    const s = String(str || '');
+    for (let i = 0; i < s.length; i++) {
+      u += s.charCodeAt(i) > 255 ? 1.0 : 0.56;
+    }
+    return Math.max(0.5, u);
+  }
+
+  function wrapTitleToFit(titleStr, maxVisualUnits) {
+    const clean = String(titleStr || '未命名物品').trim();
+    if (measureVisualUnits(clean) <= maxVisualUnits) {
+      return [clean];
+    }
+    // Split into 2 balanced lines
+    const totalU = measureVisualUnits(clean);
+    const targetHalf = Math.min(maxVisualUnits, Math.max(4.5, totalU * 0.55));
+    let acc = 0;
+    let splitIdx = Math.ceil(clean.length / 2);
+    for (let i = 0; i < clean.length; i++) {
+      acc += clean.charCodeAt(i) > 255 ? 1.0 : 0.56;
+      if (acc >= targetHalf) {
+        splitIdx = i + 1;
+        break;
+      }
+    }
+    // Prefer breaking at space if one is within 2 chars
+    const spaceNear = clean.lastIndexOf(' ', splitIdx + 1);
+    if (spaceNear > 2 && spaceNear >= splitIdx - 3) {
+      return [clean.slice(0, spaceNear).trim(), clean.slice(spaceNear + 1).trim()];
+    }
+    return [clean.slice(0, splitIdx).trim(), clean.slice(splitIdx).trim()].filter(Boolean);
+  }
+
+  function getTemplateDefaultTextOrigin(tplId) {
+    // Verified 0.00% cutout-overlap solid regions in 400x560 cover space
+    if (tplId === 'curtain') {
+      return { xLeft: 194, yTop: 58, textColor: '#141312', subColor: '#263442', numColor: '#F5F3EF', metaMaxW: 188 };
+    }
+    if (tplId === 'bassrock') {
+      // Top-left navy sky for title (y=36..60 is 100% solid across full width), and left-side compact metadata (x=28..146 stays left of cutout x=152!)
+      return { xLeft: 28, yTop: 38, textColor: '#F4F1EA', subColor: 'rgba(244, 241, 234, 0.88)', numColor: '#F4F1EA', metaMaxW: 118 };
+    }
+    if (tplId === 'teareye') {
+      // Top-left dark charcoal forehead (y=0..178 is 100% solid across full width, completely avoiding the white teardrop cutout!)
+      return { xLeft: 28, yTop: 44, textColor: '#F5F3EF', subColor: 'rgba(245, 243, 239, 0.88)', numColor: '#F5F3EF', metaMaxW: 240 };
+    }
+    if (tplId === 'rift') {
+      // Bottom-left below the paper rift (y=432..545 is 100% solid across full width!)
+      return { xLeft: 28, yTop: 426, textColor: '#F5F3EF', subColor: 'rgba(245, 243, 239, 0.88)', numColor: '#F5F3EF', metaMaxW: 240 };
+    }
+    if (tplId === 'roadbum') {
+      // Top-left warm cream border (y=0..150 is 100% solid across full width!)
+      return { xLeft: 28, yTop: 40, textColor: '#141312', subColor: '#3A3632', numColor: '#141312', metaMaxW: 260 };
+    }
+    if (tplId === 'mouth') {
+      // Top-left above the upper lip (y=0..160 is 100% solid across full width, completely avoiding the mouth cutout!)
+      return { xLeft: 28, yTop: 42, textColor: '#141312', subColor: '#322B24', numColor: '#141312', metaMaxW: 260 };
+    }
+    return { xLeft: 32, yTop: 48, textColor: '#141312', subColor: '#2E2B28', numColor: '#141312', metaMaxW: 250 };
+  }
+
+  function renderGrundtvigTypographySVG(item, textColor, subColor, baseX, baseY, fontFamily, showYearStack = true, numColor = null, metaMaxW = 240) {
     const cat = getCategory(item.catId);
     const st = getItemStatus(item);
-    const titleStr = (item.title || '未命名物品').slice(0, 12);
+    const fullTitle = (item.title || '未命名物品').trim();
     const openMMDD = (item.openDate || '2026-01-01').slice(5).replace('-', '');
     const expMMDD = (item.expiryDate || '2026-06-01').slice(5).replace('-', '');
-    const yearFill = numColor || textColor;
+
+    const userTx = Number(item.textX || 0);
+    const userTy = Number(item.textY || 0);
+    const userScale = Math.max(0.68, Math.min(1.4, Number(item.textScale || 1)));
+    const colorMode = item.textColorMode || 'auto';
+
+    let finalTextColor = textColor;
+    let finalSubColor = subColor;
+    if (colorMode === 'dark') {
+      finalTextColor = '#141312';
+      finalSubColor = '#2E2A25';
+    } else if (colorMode === 'light') {
+      finalTextColor = '#FAF8F3';
+      finalSubColor = 'rgba(250, 248, 243, 0.88)';
+    }
+    const isLightText = finalTextColor.toUpperCase().startsWith('#F') || finalTextColor.startsWith('rgb(2');
+    const haloStroke = isLightText ? 'rgba(18, 16, 14, 0.36)' : 'rgba(252, 250, 246, 0.48)';
+    const yearFill = numColor || finalTextColor;
+
+    // Clamp X so text never enters the left spine groove (<24) or overflows the right edge (>384)
+    const xLeft = Math.max(24, Math.min(268, Math.round(baseX + userTx)));
+    const availRightW = Math.max(114, 384 - xLeft);
+
+    // Determine title font size & automatic 1-or-2 line wrap so it NEVER overflows x=384
+    let baseTitleFs = 21 * userScale;
+    const titleUnits = measureVisualUnits(fullTitle);
+    let titleLines = [fullTitle];
+    if (titleUnits * baseTitleFs > availRightW) {
+      const fittedSingleFs = availRightW / titleUnits;
+      if (fittedSingleFs >= 15.5 * Math.min(1, userScale)) {
+        baseTitleFs = fittedSingleFs;
+      } else {
+        const maxUnitsPerLine = Math.max(5.5, availRightW / (18.5 * userScale));
+        titleLines = wrapTitleToFit(fullTitle, maxUnitsPerLine);
+        const longestLineU = Math.max(...titleLines.map(measureVisualUnits));
+        baseTitleFs = Math.min(19.5 * userScale, availRightW / longestLineU);
+      }
+    }
+    const titleLineStep = Math.round(baseTitleFs * 1.18);
+    const extraTitleH = (titleLines.length - 1) * titleLineStep;
+
+    const catFs = Math.round(15.5 * userScale * 10) / 10;
+    const metaFs = Math.round(11 * userScale * 10) / 10;
+    const dateFs = Math.round(10.5 * userScale * 10) / 10;
+
+    // Total vertical height of the typography block
+    const totalBlockH = Math.round(98 * userScale + extraTitleH);
+    // Clamp Y so the entire block stays 100% inside the 400x560 cover [32, 544]
+    const yTop = Math.max(32, Math.min(544 - totalBlockH, Math.round(baseY + userTy)));
+
+    // Effective max width for Source / Status lines (avoids cutout when at default position, and never exceeds right edge 384)
+    const isNearDefault = Math.abs(userTx) < 16 && Math.abs(userTy) < 16;
+    const effectiveMetaMaxW = Math.min(availRightW, isNearDefault ? metaMaxW : availRightW);
+
+    const srcLineStr = `${item.sourceTag || '自购'} · 保质期 ${item.durationDays} 天`;
+    const srcLineW = measureVisualUnits(srcLineStr) * metaFs;
+    const srcLengthAttr = srcLineW > effectiveMetaMaxW
+      ? ` textLength="${Math.floor(effectiveMetaMaxW)}" lengthAdjust="spacingAndGlyphs"`
+      : '';
+
+    const statusLineStr = `Status: ${st.coverText}`;
+    const statusLineW = measureVisualUnits(statusLineStr) * metaFs;
+    const statusLengthAttr = statusLineW > effectiveMetaMaxW
+      ? ` textLength="${Math.floor(effectiveMetaMaxW)}" lengthAdjust="spacingAndGlyphs"`
+      : '';
+
+    // Use compact YY/MM/DD date range when space is tight (e.g. bassrock left margin) so it never touches the cutout
+    const rawDateRange = `(${item.openDate} → ${item.expiryDate})`;
+    const shortOpen = (item.openDate || '2026-01-01').slice(2).replace(/-/g, '/');
+    const shortExp = (item.expiryDate || '2026-06-01').slice(2).replace(/-/g, '/');
+    const compactDateRange = `(${shortOpen} → ${shortExp})`;
+    const dateRangeStr = (measureVisualUnits(rawDateRange) * dateFs > effectiveMetaMaxW) ? compactDateRange : rawDateRange;
+    const dateRangeW = measureVisualUnits(dateRangeStr) * dateFs;
+    const dateLengthAttr = dateRangeW > effectiveMetaMaxW
+      ? ` textLength="${Math.floor(effectiveMetaMaxW)}" lengthAdjust="spacingAndGlyphs"`
+      : '';
+
+    const yCat = Math.round(yTop + extraTitleH + 20 * userScale);
+    const ySrcLabel = Math.round(yCat + 24 * userScale);
+    const ySrcVal = Math.round(ySrcLabel + 14.5 * userScale);
+    const yStLabel = Math.round(ySrcVal + 20 * userScale);
+    const yStDate = Math.round(yStLabel + 14 * userScale);
+
+    // If the text block is placed in the bottom-right corner, move the big MMDD stack to bottom-left so they never overlap
+    const textOverlapsBottomRight = (xLeft + Math.min(availRightW, 170) > 275) && (yStDate > 445);
+    const numX = textOverlapsBottomRight ? 28 : 374;
+    const numAnchor = textOverlapsBottomRight ? 'start' : 'end';
+
+    const titleSvgLines = titleLines.map((line, idx) => {
+      const ly = Math.round(yTop + idx * titleLineStep);
+      const lineU = measureVisualUnits(line);
+      const tLenAttr = (lineU * baseTitleFs > availRightW)
+        ? ` textLength="${Math.floor(availRightW)}" lengthAdjust="spacingAndGlyphs"`
+        : '';
+      return `<text x="${xLeft}" y="${ly}" font-size="${baseTitleFs.toFixed(1)}" font-weight="600" letter-spacing="-0.3"${tLenAttr}>${escapeHTML(line)}</text>`;
+    }).join('');
 
     return `
-      <g font-family="${fontFamily}" fill="${textColor}">
-        <text x="${xLeft}" y="${yTop}" font-size="22" font-weight="500" letter-spacing="-0.4">${escapeHTML(titleStr)}</text>
-        <text x="${xLeft}" y="${yTop + 24}" font-size="17" font-weight="400" letter-spacing="-0.3" fill="${subColor}">(${escapeHTML(cat.name)})</text>
+      <g class="svg-cover-text-hit" data-hit="text" font-family="${fontFamily}" fill="${finalTextColor}" style="cursor:move;paint-order:stroke fill;stroke:${haloStroke};stroke-width:2px;stroke-linejoin:round">
+        <rect x="${xLeft - 8}" y="${yTop - 22}" width="${Math.min(availRightW + 12, 240)}" height="${totalBlockH + 14}" fill="transparent" stroke="none" pointer-events="all" />
+        ${titleSvgLines}
+        <text x="${xLeft}" y="${yCat}" font-size="${catFs}" font-weight="400" letter-spacing="-0.2" fill="${finalSubColor}">(${escapeHTML(cat.name)})</text>
 
-        <text x="${xLeft}" y="${yTop + 62}" font-size="11.5" font-weight="700">Source:</text>
-        <text x="${xLeft}" y="${yTop + 78}" font-size="11.5" font-weight="400" fill="${subColor}">${escapeHTML(item.sourceTag || '自购')} · 保质期 ${item.durationDays} 天</text>
+        <text x="${xLeft}" y="${ySrcLabel}" font-size="${metaFs}" font-weight="700">Source:</text>
+        <text x="${xLeft}" y="${ySrcVal}" font-size="${metaFs}" font-weight="400" fill="${finalSubColor}"${srcLengthAttr}>${escapeHTML(srcLineStr)}</text>
 
-        <text x="${xLeft}" y="${yTop + 106}" font-size="11.5"><tspan font-weight="700">Status:</tspan> <tspan font-weight="400" fill="${subColor}">${escapeHTML(st.coverText)}</tspan></text>
-        <text x="${xLeft}" y="${yTop + 122}" font-size="11" font-weight="400" fill="${subColor}">(${item.openDate} → ${item.expiryDate})</text>
-
-        ${showYearStack ? `
-          <text x="374" y="500" text-anchor="end" font-size="30" font-weight="400" letter-spacing="-0.5" fill="${yearFill}">${openMMDD}</text>
-          <text x="374" y="532" text-anchor="end" font-size="30" font-weight="400" letter-spacing="-0.5" fill="${yearFill}">${expMMDD}</text>
-        ` : ''}
+        <text x="${xLeft}" y="${yStLabel}" font-size="${metaFs}"${statusLengthAttr}><tspan font-weight="700">Status:</tspan> <tspan font-weight="400" fill="${finalSubColor}">${escapeHTML(st.coverText)}</tspan></text>
+        <text x="${xLeft}" y="${yStDate}" font-size="${dateFs}" font-weight="400" fill="${finalSubColor}"${dateLengthAttr}>${escapeHTML(dateRangeStr)}</text>
       </g>
+      ${showYearStack ? `
+        <g font-family="${fontFamily}" fill="${yearFill}" style="pointer-events:none;paint-order:stroke fill;stroke:${haloStroke};stroke-width:1.5px">
+          <text x="${numX}" y="500" text-anchor="${numAnchor}" font-size="30" font-weight="400" letter-spacing="-0.5">${openMMDD}</text>
+          <text x="${numX}" y="532" text-anchor="${numAnchor}" font-size="30" font-weight="400" letter-spacing="-0.5">${expMMDD}</text>
+        </g>
+      ` : ''}
     `;
   }
 
@@ -2842,7 +3074,7 @@
     const tplId = item.templateId || 'curtain';
     const photoHref = getItemArtwork(item);
     const shiftY = Number(item.coverShiftY || 0);
-    const textShiftY = Math.max(-55, Math.min(75, shiftY * 0.45));
+    const textShiftY = Math.max(-45, Math.min(60, shiftY * 0.35));
 
     const cx = 200;
     const cy = 320;
@@ -2860,49 +3092,11 @@
           ? bakedOriginalCovers[tplId].dataUrl
           : (CLEAN_COVER_BLOB_URLS[tplId] || EMBEDDED_CLEAN_ORIGINALS[tplId] || '');
 
-    let textColor = '#141312';
-    let subColor = '#2E2B28';
-    let numColor = '#141312';
-    let xLeft = 56;
-    let yTop = 66;
-
-    if (tplId === 'curtain') {
-      textColor = '#141312';
-      subColor = '#2C3A48';
-      numColor = '#F5F3EF';
-      xLeft = 206;
-      yTop = 78;
-    } else if (tplId === 'bassrock') {
-      textColor = '#F4F1EA';
-      subColor = 'rgba(244, 241, 234, 0.82)';
-      numColor = '#F4F1EA';
-      xLeft = 32;
-      yTop = 44;
-    } else if (tplId === 'teareye') {
-      textColor = '#F5F3EF';
-      subColor = 'rgba(245, 243, 239, 0.86)';
-      numColor = '#F5F3EF';
-      xLeft = 28;
-      yTop = 390;
-    } else if (tplId === 'rift') {
-      textColor = '#F5F3EF';
-      subColor = 'rgba(245, 243, 239, 0.86)';
-      numColor = '#F5F3EF';
-      xLeft = 26;
-      yTop = 64;
-    } else if (tplId === 'roadbum') {
-      textColor = '#141312';
-      subColor = '#3A3632';
-      numColor = '#141312';
-      xLeft = 26;
-      yTop = 48;
-    } else if (tplId === 'mouth') {
-      textColor = '#141312';
-      subColor = '#3A3228';
-      numColor = '#141312';
-      xLeft = 26;
-      yTop = 415;
-    }
+    const def = getTemplateDefaultTextOrigin(tplId);
+    const effectiveItem = {
+      ...item,
+      textY: Number(item.textY || 0) + textShiftY
+    };
 
     if (customPng) {
       return `
@@ -2911,9 +3105,7 @@
           <image href="${photoHref}" x="0" y="0" width="400" height="560" preserveAspectRatio="xMidYMid slice" />
         </g>
         <image href="${customPng}" x="0" y="${shiftY}" width="400" height="560" preserveAspectRatio="none" />
-        <g transform="translate(0, ${textShiftY})">
-          ${renderGrundtvigTypographySVG(item, textColor, subColor, xLeft, yTop, font.family, true, numColor)}
-        </g>
+        ${renderGrundtvigTypographySVG(effectiveItem, def.textColor, def.subColor, def.xLeft, def.yTop, font.family, true, def.numColor, def.metaMaxW)}
       `;
     }
 
@@ -2922,7 +3114,7 @@
       <g transform="${imgTransform}">
         <image href="${photoHref}" x="0" y="0" width="400" height="560" preserveAspectRatio="xMidYMid slice" />
       </g>
-      ${renderGrundtvigTypographySVG(item, textColor, subColor, xLeft, yTop, font.family, true, numColor)}
+      ${renderGrundtvigTypographySVG(effectiveItem, def.textColor, def.subColor, def.xLeft, def.yTop, font.family, true, def.numColor, def.metaMaxW)}
     `;
   }
 
@@ -3072,6 +3264,7 @@
 
   function syncViewModeUI() {
     const isGrid = viewMode === 'grid';
+    document.body.classList.toggle('grid-mode', isGrid);
     const btnMode = document.getElementById('btn-toggle-view-mode');
     if (btnMode) {
       btnMode.textContent = isGrid ? '📚 3D 书架' : '⊞ 宫格速览';
@@ -3746,23 +3939,71 @@
   const detailPosterSvg = detailDialog.querySelector('.poster-svg');
   const detailCoverShiftInput = document.getElementById('detail-cover-shift');
   const detailShiftVal = document.getElementById('detail-shift-val');
+  const detailTextXInput = document.getElementById('detail-text-x');
+  const detailTextYInput = document.getElementById('detail-text-y');
+  const detailTextPosVal = document.getElementById('detail-text-pos-val');
+  const detailTextScaleInput = document.getElementById('detail-text-scale');
+  const detailTextScaleVal = document.getElementById('detail-text-scale-val');
+  const btnDetailTextColor = document.getElementById('btn-detail-text-color');
 
-  // Direct touch/mouse drag on the Detail Book Cover to pan photo position in real time!
+  let detailDragMode = 'text'; // 'text' | 'photo' | 'cover'
+  function setDetailDragMode(mode) {
+    detailDragMode = mode;
+    const bt = document.getElementById('detail-mode-drag-text');
+    const bp = document.getElementById('detail-mode-drag-photo');
+    const bc = document.getElementById('detail-mode-drag-cover');
+    if (bt) bt.classList.toggle('active', mode === 'text');
+    if (bp) bp.classList.toggle('active', mode === 'photo');
+    if (bc) bc.classList.toggle('active', mode === 'cover');
+  }
+
+  document.getElementById('detail-mode-drag-text').addEventListener('click', () => setDetailDragMode('text'));
+  document.getElementById('detail-mode-drag-photo').addEventListener('click', () => setDetailDragMode('photo'));
+  document.getElementById('detail-mode-drag-cover').addEventListener('click', () => setDetailDragMode('cover'));
+
+  function syncDetailTextControls(item) {
+    if (!item) return;
+    const tx = Math.round(Number(item.textX || 0));
+    const ty = Math.round(Number(item.textY || 0));
+    const tsc = Number(item.textScale || 1);
+    const cm = item.textColorMode || 'auto';
+    if (detailTextXInput) detailTextXInput.value = String(tx);
+    if (detailTextYInput) detailTextYInput.value = String(ty);
+    if (detailTextPosVal) detailTextPosVal.textContent = `${tx > 0 ? '+' : ''}${tx}, ${ty > 0 ? '+' : ''}${ty}`;
+    if (detailTextScaleInput) detailTextScaleInput.value = String(tsc);
+    if (detailTextScaleVal) detailTextScaleVal.textContent = `${Math.round(tsc * 100)}%`;
+    if (btnDetailTextColor) {
+      const labelMap = { auto: '字色: 自动', light: '字色: 浅色白', dark: '字色: 深色黑' };
+      btnDetailTextColor.textContent = labelMap[cm] || '字色: 自动';
+    }
+  }
+
+  // Direct touch/mouse drag on the Detail Book Cover to move text, photo, or cover in real time!
   let isDraggingDetailPoster = false;
   let dpStartX = 0;
   let dpStartY = 0;
   let dpInitCropX = 0;
   let dpInitCropY = 0;
+  let dpInitTextX = 0;
+  let dpInitTextY = 0;
+  let dpInitShiftY = 0;
 
   if (detailPosterSvg) {
     detailPosterSvg.addEventListener('pointerdown', (e) => {
       const item = visibleItems[activeIdx];
       if (!item) return;
+      // If user touches directly on the text block, automatically activate 'text' drag mode!
+      if (e.target && e.target.closest && e.target.closest('.svg-cover-text-hit')) {
+        setDetailDragMode('text');
+      }
       isDraggingDetailPoster = true;
       dpStartX = e.clientX;
       dpStartY = e.clientY;
       dpInitCropX = Number(item.cropX || 0);
       dpInitCropY = Number(item.cropY || 0);
+      dpInitTextX = Number(item.textX || 0);
+      dpInitTextY = Number(item.textY || 0);
+      dpInitShiftY = Number(item.coverShiftY || 0);
       try { detailPosterSvg.setPointerCapture(e.pointerId); } catch (err) {}
     });
 
@@ -3770,10 +4011,24 @@
       if (!isDraggingDetailPoster) return;
       const item = visibleItems[activeIdx];
       if (!item) return;
-      const dx = (e.clientX - dpStartX) * 1.25;
-      const dy = (e.clientY - dpStartY) * 1.25;
-      item.cropX = Math.round(dpInitCropX + dx);
-      item.cropY = Math.round(dpInitCropY + dy);
+      const rect = detailPosterSvg.getBoundingClientRect();
+      const scaleX = 400 / Math.max(120, rect.width);
+      const scaleY = 560 / Math.max(160, rect.height);
+      const dx = (e.clientX - dpStartX) * scaleX;
+      const dy = (e.clientY - dpStartY) * scaleY;
+
+      if (detailDragMode === 'text') {
+        item.textX = Math.max(-180, Math.min(200, Math.round(dpInitTextX + dx)));
+        item.textY = Math.max(-360, Math.min(380, Math.round(dpInitTextY + dy)));
+        syncDetailTextControls(item);
+      } else if (detailDragMode === 'cover') {
+        item.coverShiftY = Math.max(-140, Math.min(120, Math.round(dpInitShiftY + dy)));
+        detailCoverShiftInput.value = String(item.coverShiftY);
+        detailShiftVal.textContent = `${item.coverShiftY > 0 ? '+' : ''}${item.coverShiftY}px`;
+      } else {
+        item.cropX = Math.round(dpInitCropX + dx);
+        item.cropY = Math.round(dpInitCropY + dy);
+      }
       detailBookSvgContent.innerHTML = renderHardcoverBookSVG(item, 'detail');
     });
 
@@ -3782,9 +4037,88 @@
       isDraggingDetailPoster = false;
       const item = visibleItems[activeIdx];
       if (item) {
-        persistAll('已保存实拍图透窗位置');
+        const msg = detailDragMode === 'text' ? '已保存封面文字位置' : detailDragMode === 'cover' ? '已保存书皮高低位置' : '已保存实拍图透窗位置';
+        persistAll(msg);
         updateSingleItemInShelf(item);
       }
+    });
+  }
+
+  // Preset position buttons in Detail View (默认避窗 / 左上 / 右上 / 左下 / 右下)
+  document.querySelectorAll('#detail-text-pos-presets [data-pos-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = visibleItems[activeIdx];
+      if (!item) return;
+      const preset = btn.dataset.posPreset;
+      const def = getTemplateDefaultTextOrigin(item.templateId || 'curtain');
+      if (preset === 'default') {
+        item.textX = 0;
+        item.textY = 0;
+        item.textScale = 1;
+        item.textColorMode = 'auto';
+      } else if (preset === 'tl') {
+        item.textX = 28 - def.xLeft;
+        item.textY = 40 - def.yTop;
+      } else if (preset === 'tr') {
+        item.textX = 194 - def.xLeft;
+        item.textY = 46 - def.yTop;
+      } else if (preset === 'bl') {
+        item.textX = 28 - def.xLeft;
+        item.textY = 418 - def.yTop;
+      } else if (preset === 'br') {
+        item.textX = 164 - def.xLeft;
+        item.textY = 416 - def.yTop;
+      }
+      syncDetailTextControls(item);
+      detailBookSvgContent.innerHTML = renderHardcoverBookSVG(item, 'detail');
+      persistAll('已更新封面文字位置');
+      updateSingleItemInShelf(item);
+    });
+  });
+
+  if (btnDetailTextColor) {
+    btnDetailTextColor.addEventListener('click', () => {
+      const item = visibleItems[activeIdx];
+      if (!item) return;
+      const modes = ['auto', 'light', 'dark'];
+      const cur = item.textColorMode || 'auto';
+      item.textColorMode = modes[(modes.indexOf(cur) + 1) % modes.length];
+      syncDetailTextControls(item);
+      detailBookSvgContent.innerHTML = renderHardcoverBookSVG(item, 'detail');
+      persistAll('已切换封面文字配色');
+      updateSingleItemInShelf(item);
+    });
+  }
+
+  [detailTextXInput, detailTextYInput].forEach(inp => {
+    if (!inp) return;
+    inp.addEventListener('input', () => {
+      const item = visibleItems[activeIdx];
+      if (!item) return;
+      item.textX = Number(detailTextXInput.value || 0);
+      item.textY = Number(detailTextYInput.value || 0);
+      syncDetailTextControls(item);
+      detailBookSvgContent.innerHTML = renderHardcoverBookSVG(item, 'detail');
+    });
+    inp.addEventListener('change', () => {
+      const item = visibleItems[activeIdx];
+      persistAll('已保存封面文字位置');
+      if (item) updateSingleItemInShelf(item);
+    });
+  });
+
+  if (detailTextScaleInput) {
+    detailTextScaleInput.addEventListener('input', () => {
+      const item = visibleItems[activeIdx];
+      if (!item) return;
+      item.textScale = Number(detailTextScaleInput.value || 1);
+      syncDetailTextControls(item);
+      detailBookSvgContent.innerHTML = renderHardcoverBookSVG(item, 'detail');
+    });
+    detailTextScaleInput.addEventListener('change', () => {
+      const item = visibleItems[activeIdx];
+      persistAll('已保存封面文字大小');
+      if (item) updateSingleItemInShelf(item);
     });
   }
 
@@ -3822,6 +4156,7 @@
     const shiftVal = Number(item.coverShiftY || 0);
     detailCoverShiftInput.value = String(shiftVal);
     detailShiftVal.textContent = `${shiftVal > 0 ? '+' : ''}${shiftVal}px`;
+    syncDetailTextControls(item);
 
     document.getElementById('d-synopsis').textContent =
       item.notes || `该物品属于「${cat.name}」分类，于 ${item.openDate} 开启使用，预计将于 ${item.expiryDate} 到期。`;
@@ -3835,7 +4170,10 @@
       btn.textContent = tpl.name;
       btn.addEventListener('click', () => {
         item.templateId = tpl.id;
-        persistAll('已切换封面书皮');
+        // Reset custom text offset when switching cover template so it snaps to the new cover's cutout-safe spot
+        item.textX = 0;
+        item.textY = 0;
+        persistAll('已切换封面书皮并自动匹配文字位置');
         populateDetail(item);
         updateSingleItemInShelf(item);
       });
@@ -3964,6 +4302,8 @@
   const fAutoIcs = document.getElementById('f-auto-ics');
   const fCropScale = document.getElementById('f-crop-scale');
   const fCoverShift = document.getElementById('f-cover-shift');
+  const fTextScale = document.getElementById('f-text-scale');
+  const btnStudioTextColor = document.getElementById('btn-studio-text-color');
   const studioInteractiveStage = document.getElementById('studio-interactive-stage');
   const studioPreviewSvg = document.getElementById('studio-preview-svg');
 
@@ -3978,16 +4318,33 @@
     cropY: 0,
     cropScale: 1,
     coverShiftY: 0,
-    dragMode: 'photo'
+    textX: 0,
+    textY: 0,
+    textScale: 1,
+    textColorMode: 'auto',
+    dragMode: 'text'
   };
 
   function setStudioDragMode(mode) {
     studioState.dragMode = mode;
-    document.getElementById('mode-drag-photo').classList.toggle('active', mode === 'photo');
-    document.getElementById('mode-drag-cover').classList.toggle('active', mode === 'cover');
+    const bt = document.getElementById('mode-drag-text');
+    const bp = document.getElementById('mode-drag-photo');
+    const bc = document.getElementById('mode-drag-cover');
+    if (bt) bt.classList.toggle('active', mode === 'text');
+    if (bp) bp.classList.toggle('active', mode === 'photo');
+    if (bc) bc.classList.toggle('active', mode === 'cover');
   }
+  document.getElementById('mode-drag-text').addEventListener('click', () => setStudioDragMode('text'));
   document.getElementById('mode-drag-photo').addEventListener('click', () => setStudioDragMode('photo'));
   document.getElementById('mode-drag-cover').addEventListener('click', () => setStudioDragMode('cover'));
+
+  function syncStudioTextControls() {
+    if (fTextScale) fTextScale.value = String(studioState.textScale || 1);
+    if (btnStudioTextColor) {
+      const labelMap = { auto: '字色:自动', light: '字色:浅白', dark: '字色:深黑' };
+      btnStudioTextColor.textContent = labelMap[studioState.textColorMode || 'auto'] || '字色:自动';
+    }
+  }
 
   function updateStudioPreview() {
     const tempItem = {
@@ -4006,7 +4363,11 @@
       cropX: studioState.cropX,
       cropY: studioState.cropY,
       cropScale: studioState.cropScale,
-      coverShiftY: studioState.coverShiftY
+      coverShiftY: studioState.coverShiftY,
+      textX: studioState.textX,
+      textY: studioState.textY,
+      textScale: studioState.textScale,
+      textColorMode: studioState.textColorMode
     };
     studioPreviewSvg.innerHTML = renderHardcoverBookSVG(tempItem, 'studio');
   }
@@ -4017,14 +4378,21 @@
   let initialCropX = 0;
   let initialCropY = 0;
   let initialShiftY = 0;
+  let initialTextX = 0;
+  let initialTextY = 0;
 
   studioInteractiveStage.addEventListener('pointerdown', (e) => {
+    if (e.target && e.target.closest && e.target.closest('.svg-cover-text-hit')) {
+      setStudioDragMode('text');
+    }
     isDraggingStudio = true;
     cropStartX = e.clientX;
     cropStartY = e.clientY;
     initialCropX = studioState.cropX;
     initialCropY = studioState.cropY;
     initialShiftY = studioState.coverShiftY;
+    initialTextX = Number(studioState.textX || 0);
+    initialTextY = Number(studioState.textY || 0);
     studioInteractiveStage.setPointerCapture(e.pointerId);
   });
 
@@ -4032,7 +4400,10 @@
     if (!isDraggingStudio) return;
     const dx = (e.clientX - cropStartX) * (400 / 184);
     const dy = (e.clientY - cropStartY) * (560 / 258);
-    if (studioState.dragMode === 'cover') {
+    if (studioState.dragMode === 'text') {
+      studioState.textX = Math.max(-180, Math.min(200, Math.round(initialTextX + dx)));
+      studioState.textY = Math.max(-360, Math.min(380, Math.round(initialTextY + dy)));
+    } else if (studioState.dragMode === 'cover') {
       studioState.coverShiftY = Math.max(-140, Math.min(120, Math.round(initialShiftY + dy)));
       fCoverShift.value = String(studioState.coverShiftY);
     } else {
@@ -4061,6 +4432,32 @@
 
   fCoverShift.addEventListener('input', () => {
     studioState.coverShiftY = Number(fCoverShift.value);
+    updateStudioPreview();
+  });
+
+  if (fTextScale) {
+    fTextScale.addEventListener('input', () => {
+      studioState.textScale = Number(fTextScale.value || 1);
+      updateStudioPreview();
+    });
+  }
+
+  if (btnStudioTextColor) {
+    btnStudioTextColor.addEventListener('click', () => {
+      const modes = ['auto', 'light', 'dark'];
+      const cur = studioState.textColorMode || 'auto';
+      studioState.textColorMode = modes[(modes.indexOf(cur) + 1) % modes.length];
+      syncStudioTextControls();
+      updateStudioPreview();
+    });
+  }
+
+  document.getElementById('btn-reset-text-pos').addEventListener('click', () => {
+    studioState.textX = 0;
+    studioState.textY = 0;
+    studioState.textScale = 1;
+    studioState.textColorMode = 'auto';
+    syncStudioTextControls();
     updateStudioPreview();
   });
 
@@ -4228,7 +4625,11 @@
         cropY: Number(editItem.cropY || 0),
         cropScale: Number(editItem.cropScale || 1),
         coverShiftY: Number(editItem.coverShiftY || 0),
-        dragMode: 'photo'
+        textX: Number(editItem.textX || 0),
+        textY: Number(editItem.textY || 0),
+        textScale: Number(editItem.textScale || 1),
+        textColorMode: editItem.textColorMode || 'auto',
+        dragMode: 'text'
       };
     } else {
       document.getElementById('item-modal-title').textContent = '记录新开封物品';
@@ -4254,11 +4655,16 @@
         cropY: 36,
         cropScale: 1.15,
         coverShiftY: 0,
-        dragMode: 'photo'
+        textX: 0,
+        textY: 0,
+        textScale: 1,
+        textColorMode: 'auto',
+        dragMode: 'text'
       };
     }
 
-    setStudioDragMode('photo');
+    setStudioDragMode('text');
+    syncStudioTextControls();
     fCropScale.value = String(studioState.cropScale);
     fCoverShift.value = String(studioState.coverShiftY);
     renderStudioTemplateChips();
@@ -4346,6 +4752,10 @@
       cropY: studioState.cropY,
       cropScale: studioState.cropScale,
       coverShiftY: studioState.coverShiftY,
+      textX: studioState.textX,
+      textY: studioState.textY,
+      textScale: studioState.textScale,
+      textColorMode: studioState.textColorMode,
       notes: fNotes.value.trim(),
       seed: allItems.length
     };
